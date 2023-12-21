@@ -214,17 +214,15 @@ class UFCStatsScraper:
                 columns = row.find_all("td")
                 round_data = {
                     "round": round_number,
-                    "fighter": columns[0].get_text(strip=True),
-                    "kd": columns[1].get_text(strip=True),
-                    "significant_strikes": columns[2].get_text(strip=True),
-                    "significant_strike_percentage": columns[3].get_text(
-                        strip=True
-                    ),
-                    "total_strikes": columns[4].get_text(strip=True),
-                    "td_percentage": columns[5].get_text(strip=True),
-                    "sub_attempts": columns[6].get_text(strip=True),
-                    "reversals": columns[7].get_text(strip=True),
-                    "control": columns[8].get_text(strip=True),
+                    "fighter": columns[0].get_text(),
+                    "kd": columns[1].get_text(),
+                    "significant_strikes": columns[2].get_text(),
+                    "significant_strike_percentage": columns[3].get_text(),
+                    "total_strikes": columns[4].get_text(),
+                    "td_percentage": columns[5].get_text(),
+                    "sub_attempts": columns[6].get_text(),
+                    "reversals": columns[7].get_text(),
+                    "control": columns[8].get_text(),
                 }
                 rounds_data.append(round_data)
 
