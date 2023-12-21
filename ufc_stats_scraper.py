@@ -39,7 +39,7 @@ class UFCStatsScraper:
 
         return meta_info
 
-    def get_totals(self):
+    def get_total_strikes(self):
         totals = {}
         # Trying a broader search for the 'Totals' section
         potential_sections = self.soup.find_all(
@@ -291,7 +291,7 @@ if __name__ == "__main__":
 
     # Get totals
     logger.info("\nTotals:")
-    totals = scraper.get_totals()
+    totals = scraper.get_total_strikes()
     logger.info(totals)
 
     # Get significant strikes
