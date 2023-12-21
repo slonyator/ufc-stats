@@ -71,6 +71,9 @@ class UFCStatsScraper:
                         fighter_data[header] = col.get_text().strip()
 
                     totals[fighter_name] = fighter_data
+
+                totals = self._split_and_reorganize(totals)
+
                 return totals
 
         print("Totals section not found in the HTML.")
@@ -254,6 +257,26 @@ class UFCStatsScraper:
 
                 data[fighter_name] = fighter_data
         return data
+
+    def _split_and_reorganize(self, data):
+        new_dict = {}
+
+        for combined_key, stats in data.items():
+            # Splitting the main key into individual keys
+            keys = combined_key.split('\n\n\n')
+
+            # Splitting and reorganizing each stat for the individual keys
+            for key in keys:
+                new_dict[key] = {}
+
+            for stat_key, combined_value in stats.items():
+                values = combined_value.split('\n    \n\n')
+
+                for key, value in zip(keys, values):
+                    new_dict[key][stat_key] = value.strip()
+
+        return new_dict
+
 
 
 if __name__ == "__main__":
