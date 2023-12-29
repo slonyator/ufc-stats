@@ -10,25 +10,29 @@ class UfcEventsSpider(scrapy.Spider):
         self.results_list = results_list
 
     def parse(self, response):
-        for event_row in response.xpath('//tr[contains(@class, "b-statistics__table-row")]'):
-            link = event_row.xpath('.//a/@href').extract_first()
-            event_name = event_row.xpath('.//a/text()').extract_first()
-            event_date = event_row.xpath('.//span[@class="b-statistics__date"]/text()').extract_first()
-            location = event_row.xpath('following-sibling::tr[1]/td/text()').extract_first()
+        # Iterate over each event row
+        for event_row in response.css('tr.b-statistics__table-row'):
+            link = event_row.css('a::attr(href)').get()
+            event_name = event_row.css('a::text').get()
+            event_date = event_row.css('span.b-statistics__date::text').get()
+            location = event_row.xpath('following-sibling::tr[1]/td[@class="b-statistics__table-col b-statistics__table-col_style_big-top-padding"]/text()').get()
 
             item = {
                 'event_name': event_name.strip() if event_name else '',
                 'date': event_date.strip() if event_date else '',
                 'location': location.strip() if location else 'Unknown',
-                'link': link.strip() if link else ''
+                'link': link
             }
             self.results_list.append(item)
             yield item
 
-        # Pagination
-        next_page = response.css('a.b-link_style_black::attr(href)').extract()[-1]
-        if next_page and response.urljoin(next_page) != response.url:
-            yield response.follow(next_page, self.parse)
+        # Handle pagination
+        current_page = response.css('li.b-statistics__paginate-item.b-statistics__paginate-item_state_current::text').get()
+        next_page = response.css('li.b-statistics__paginate-item > a::attr(href)').extract()
+        if current_page and next_page:
+            next_page_url = next_page[-1]  # Assuming the last link is the 'Next' button
+            if next_page_url and response.urljoin(next_page_url) != response.url:
+                yield response.follow(next_page_url, self.parse)
 
 def run_spider():
     scraped_items = []
