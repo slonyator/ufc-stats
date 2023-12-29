@@ -34,14 +34,17 @@ class UfcEventsSpider(scrapy.Spider):
             if next_page_url and response.urljoin(next_page_url) != response.url:
                 yield response.follow(next_page_url, self.parse)
 
-def run_spider():
-    scraped_items = []
-    process = CrawlerProcess(settings={'LOG_LEVEL': 'DEBUG'})
-    process.crawl(UfcEventsSpider, results_list=scraped_items)
-    process.start()
-    return scraped_items
+class UfcCrawler:
+    def __init__(self):
+        self.scraped_events = []
+
+    def get_events(self):
+        process = CrawlerProcess(settings={'LOG_LEVEL': 'INFO'})
+        process.crawl(UfcEventsSpider, results_list=self.scraped_events)
+        process.start()
+        return self.scraped_events
 
 if __name__ == "__main__":
-    scraped_data = run_spider()
+    scraped_data = UfcCrawler().get_events()
     df = pd.DataFrame(scraped_data)
     print(df)
