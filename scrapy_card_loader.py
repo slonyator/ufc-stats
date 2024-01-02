@@ -23,22 +23,24 @@ class UfcCardSpider(scrapy.Spider):
                 row_data.append(cell_data.strip())
             self.results.append(dict(zip(headers, row_data)))
 
-def scrape_and_convert_to_dataframe():
-    results = []
-    process = CrawlerProcess({
-        'USER_AGENT': 'Mozilla/5.0 (compatible; Scrapy/1.0; +http://scrapy.org)'
-    })
+class UfcCrawler:
+    def scrape_and_convert_to_dataframe(self):
+        results = []
+        process = CrawlerProcess({
+            'USER_AGENT': 'Mozilla/5.0 (compatible; Scrapy/1.0; +http://scrapy.org)'
+        })
 
-    process.crawl(UfcCardSpider, results=results)
-    process.start()  # the script will block here until the crawling is finished
+        process.crawl(UfcCardSpider, results=results)
+        process.start()  # the script will block here until the crawling is finished
 
-    # Convert the results into a DataFrame
-    if results:
-        df = pd.DataFrame(results)
-        return df
-    else:
-        return pd.DataFrame()
+        # Convert the results into a DataFrame
+        if results:
+            df = pd.DataFrame(results)
+            return df
+        else:
+            return pd.DataFrame()
 
 if __name__ == "__main__":
-    df = scrape_and_convert_to_dataframe()
+    crawler = UfcCrawler()
+    df = crawler.scrape_and_convert_to_dataframe()
     print(df)
