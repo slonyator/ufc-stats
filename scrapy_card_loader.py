@@ -57,4 +57,24 @@ if __name__ == "__main__":
     for url, df in results.items():
         print(f"Data from {url}:\n", df)
 
+    # Clean up the data
+    # Example
+
+    df = results['http://ufcstats.com/event-details/a8e8587a06e73c87']
+
+    df_cleaned = (
+        df
+        .assign(
+            Kd_1=lambda x: x['Kd'].str.split('  ', expand=True)[0],
+            Kd_2=lambda x: x['Kd'].str.split('  ', expand=True)[1],
+            Str_1=lambda x: x['Str'].str.split('  ', expand=True)[0],
+            Str_2=lambda x: x['Str'].str.split('  ', expand=True)[1],
+            Td_1=lambda x: x['Td'].str.split('  ', expand=True)[0],
+            Td_2=lambda x: x['Td'].str.split('  ', expand=True)[1],
+            Sub_1=lambda x: x['Sub'].str.split('  ', expand=True)[0],
+            Sub_2=lambda x: x['Sub'].str.split('  ', expand=True)[1]
+        )
+        .drop(columns=['Fighter', 'Kd', 'Str', 'Td', 'Sub'])
+    )
+
     print("ready!")
