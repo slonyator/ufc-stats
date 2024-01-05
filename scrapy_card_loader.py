@@ -19,7 +19,12 @@ class UfcCardSpider(scrapy.Spider):
                 cell_data = row.css('td:nth-child({}) *::text'.format(i + 1)).getall()
                 cell_data = ' '.join(text.strip() for text in cell_data)
                 row_data.append(cell_data.strip())
-            self.results[response.url].append(dict(zip(headers, row_data)))
+
+            data_link = row.attrib.get('data-link')
+            row_data_dict = dict(zip(headers, row_data))
+            row_data_dict['data_link'] = data_link
+
+            self.results[response.url].append(row_data_dict)
 
 class UfcCrawler:
     def scrape_multiple_sites(self, urls):
