@@ -38,10 +38,24 @@ class UfcFightSpider(scrapy.Spider):
         if "Details" in fight_details:
             fight_details["Details"] = " ".join(fight_details["Details"])
 
+        # Extracting headers for the total strikes table
+        headers = response.css(
+            'body > section > div > div > section:nth-child(4) > table > thead > tr > th ::text').getall()
+        headers = [header.strip() for header in headers if header.strip()]
+
+            # Extracting rows for the total strikes table
+        rows = response.css('body > section > div > div > section:nth-child(4) > table > tbody > tr')
+        total_strikes_data = []
+        for row in rows:
+            row_data = row.css('td ::text').getall()
+            row_data = [data.strip() for data in row_data if data.strip()]
+            total_strikes_data.append(dict(zip(headers, row_data)))
+
         # Storing the structured data
         self.results[response.url].append(
             {
                 "fight_details": fight_details,
+                'total_strikes': total_strikes_data,
                 # ... include parsing for total_strikes and total_strikes_per_round if needed
             }
         )
