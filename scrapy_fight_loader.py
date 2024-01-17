@@ -39,32 +39,27 @@ class UfcFightSpider(scrapy.Spider):
             fight_details["Details"] = " ".join(fight_details["Details"])
 
         # Extracting headers for the total strikes table
-        header_selector = 'body > section > div > div > section:nth-child(4) > table > thead > tr'
-        headers = response.css(f'{header_selector} th ::text').getall()
+        headers = response.css(
+            'body > section > div > div > section:nth-child(4) > table > thead > tr > th ::text').getall()
         headers = [header.strip() for header in headers if header.strip()]
 
-        # Extracting rows for the total strikes table
-        row_selector = 'body > section > div > div > section:nth-child(4) > table > tbody'
-        row_data = response.css(f'{row_selector} td ::text').getall()
-        row_data = [data.strip() for data in row_data if data.strip()]
+        # Extracting data for the total strikes table
+        data_rows = response.css('body > section > div > div > section:nth-child(4) > table > tbody > tr')
+        total_strikes_data = []
 
-        # Assuming the first two elements are fighter names and they don't have colons
-        fighter_names = row_data[:2]
-        stats_data = row_data[2:]  # the rest is stats data
+        for row in data_rows:
+            row_data = row.css('td ::text').getall()
+            row_data_clean = [' '.join(td.split()) for td in row_data if td.strip()]  # Cleaning and joining data
 
-        # Split the stats data into two parts, one for each fighter
-        half = len(headers) - 1  # minus one because fighter name is already taken as separate
-        fighter_one_stats = stats_data[:half]
-        fighter_two_stats = stats_data[half:]
+            # Assuming that we have a pair of fighters, their data should be split evenly
+            midpoint = len(row_data_clean) // 2
+            fighter_one_data = row_data_clean[:midpoint]
+            fighter_two_data = row_data_clean[midpoint:]
 
-        # Prepend fighter names to their respective stats
-        fighter_one_row = [fighter_names[0]] + fighter_one_stats
-        fighter_two_row = [fighter_names[1]] + fighter_two_stats
+            total_strikes_data.append(fighter_one_data)
+            total_strikes_data.append(fighter_two_data)
 
-        # Combine rows into a list to create a DataFrame
-        total_strikes_data = [fighter_one_row, fighter_two_row]
-
-        # Convert the list of rows to a DataFrame and store under 'total_strikes'
+        # Convert the list of data into two rows for a DataFrame and store under 'total_strikes'
         total_strikes_df = pd.DataFrame(total_strikes_data, columns=headers)
 
         # Storing the structured data
