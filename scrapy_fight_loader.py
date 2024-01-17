@@ -43,7 +43,7 @@ class UfcFightSpider(scrapy.Spider):
             'body > section > div > div > section:nth-child(4) > table > thead > tr > th ::text').getall()
         headers = [header.strip() for header in headers if header.strip()]
 
-            # Extracting rows for the total strikes table
+        # Extracting rows for the total strikes table
         rows = response.css('body > section > div > div > section:nth-child(4) > table > tbody > tr')
         total_strikes_data = []
         for row in rows:
@@ -64,11 +64,9 @@ class UfcFightSpider(scrapy.Spider):
 class UfcCrawler:
     def scrape_multiple_sites(self, urls):
         results = {url: [] for url in urls}
-        process = CrawlerProcess(
-            {
-                "USER_AGENT": "Mozilla/5.0 (compatible; Scrapy/1.0; +http://scrapy.org)"
-            }
-        )
+        process = CrawlerProcess({
+            'USER_AGENT': 'Mozilla/5.0 (compatible; Scrapy/1.0; +http://scrapy.org)'
+        })
 
         process.crawl(UfcFightSpider, urls=urls, results=results)
         process.start()
@@ -78,9 +76,12 @@ class UfcCrawler:
             dataframes = {}
             for data in data_list:
                 for key, value in data.items():
-                    if key != "url":
-                        if isinstance(value, dict):
-                            # Convert the dictionary to a DataFrame
+                    if key != 'url':
+                        if key == 'total_strikes':
+                            # Convert total_strikes list of dicts to a DataFrame
+                            dataframes[key] = pd.DataFrame(value)
+                        elif isinstance(value, dict):
+                            # Convert other dict types to a DataFrame
                             dataframes[key] = pd.DataFrame([value])
                         else:
                             # Handle other types of data (like lists)
