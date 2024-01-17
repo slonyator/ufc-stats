@@ -38,37 +38,37 @@ class UfcFightSpider(scrapy.Spider):
         if "Details" in fight_details:
             fight_details["Details"] = " ".join(fight_details["Details"])
 
-            # Extracting headers for the total strikes table
-            header_selector = 'body > section > div > div > section:nth-child(4) > table > thead > tr'
-            headers = response.css(f'{header_selector} th ::text').getall()
-            headers = [header.strip() for header in headers if header.strip()]
+        # Extracting headers for the total strikes table
+        header_selector = 'body > section > div > div > section:nth-child(4) > table > thead > tr'
+        headers = response.css(f'{header_selector} th ::text').getall()
+        headers = [header.strip() for header in headers if header.strip()]
 
-            # Extracting rows for the total strikes table
-            row_selector = 'body > section > div > div > section:nth-child(4) > table > tbody > tr'
-            rows = response.css(row_selector)
-            total_strikes_data = []
+        # Extracting rows for the total strikes table
+        row_selector = 'body > section > div > div > section:nth-child(4) > table > tbody > tr'
+        rows = response.css(row_selector)
+        total_strikes_data = []
 
-            for row in rows:
-                row_data = []
-                for td in row.css('td'):
-                    cell_text = td.css('::text').getall()
-                    cell_text = ' '.join([text.strip() for text in cell_text if text.strip()])
-                    row_data.append(cell_text)
+        for row in rows:
+            row_data = []
+            for td in row.css('td'):
+                cell_text = td.css('::text').getall()
+                cell_text = ' '.join([text.strip() for text in cell_text if text.strip()])
+                row_data.append(cell_text)
 
-                if row_data:  # If there's data in the row, add it to the total_strikes_data list
-                    total_strikes_data.append(row_data)
+            if row_data:  # If there's data in the row, add it to the total_strikes_data list
+                total_strikes_data.append(row_data)
 
-            # Convert the list of lists to a DataFrame and store under 'total_strikes'
-            if total_strikes_data:
-                total_strikes_df = pd.DataFrame(total_strikes_data, columns=headers)
-            else:
-                total_strikes_df = pd.DataFrame(columns=headers)
+        # Convert the list of lists to a DataFrame and store under 'total_strikes'
+        if total_strikes_data:
+            total_strikes_df = pd.DataFrame(total_strikes_data, columns=headers)
+        else:
+            total_strikes_df = pd.DataFrame(columns=headers)
 
-            # Storing the structured data
-            self.results[response.url].append({
-                'fight_details': fight_details,  # from the previous parsing
-                'total_strikes': total_strikes_df
-            })
+        # Storing the structured data
+        self.results[response.url].append({
+            'fight_details': fight_details,  # from the previous parsing
+            'total_strikes': total_strikes_df
+        })
 
 
 class UfcCrawler:
