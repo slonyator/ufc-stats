@@ -44,25 +44,28 @@ class UfcFightSpider(scrapy.Spider):
         headers = [header.strip() for header in headers if header.strip()]
 
         # Extracting rows for the total strikes table
-        row_selector = 'body > section > div > div > section:nth-child(4) > table > tbody > tr'
-        rows = response.css(row_selector)
-        total_strikes_data = []
+        row_selector = 'body > section > div > div > section:nth-child(4) > table > tbody'
+        row_data = response.css(f'{row_selector} td ::text').getall()
+        row_data = [data.strip() for data in row_data if data.strip()]
 
-        for row in rows:
-            row_data = []
-            for td in row.css('td'):
-                cell_text = td.css('::text').getall()
-                cell_text = ' '.join([text.strip() for text in cell_text if text.strip()])
-                row_data.append(cell_text)
+        # Assuming the first two elements are fighter names and they don't have colons
+        fighter_names = row_data[:2]
+        stats_data = row_data[2:]  # the rest is stats data
 
-            if row_data:  # If there's data in the row, add it to the total_strikes_data list
-                total_strikes_data.append(row_data)
+        # Split the stats data into two parts, one for each fighter
+        half = len(headers) - 1  # minus one because fighter name is already taken as separate
+        fighter_one_stats = stats_data[:half]
+        fighter_two_stats = stats_data[half:]
 
-        # Convert the list of lists to a DataFrame and store under 'total_strikes'
-        if total_strikes_data:
-            total_strikes_df = pd.DataFrame(total_strikes_data, columns=headers)
-        else:
-            total_strikes_df = pd.DataFrame(columns=headers)
+        # Prepend fighter names to their respective stats
+        fighter_one_row = [fighter_names[0]] + fighter_one_stats
+        fighter_two_row = [fighter_names[1]] + fighter_two_stats
+
+        # Combine rows into a list to create a DataFrame
+        total_strikes_data = [fighter_one_row, fighter_two_row]
+
+        # Convert the list of rows to a DataFrame and store under 'total_strikes'
+        total_strikes_df = pd.DataFrame(total_strikes_data, columns=headers)
 
         # Storing the structured data
         self.results[response.url].append({
